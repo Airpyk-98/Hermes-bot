@@ -2,954 +2,597 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Hermes — AI Agent</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f14;
-    --surface: #161923;
-    --surface2: #1e2330;
-    --surface3: #252c3d;
-    --border: #2a3145;
-    --accent: #7c6af7;
-    --accent2: #a78bfa;
-    --accent-glow: rgba(124,106,247,0.18);
-    --user-bubble: #2d2660;
-    --user-border: #5b4fd4;
-    --agent-bubble: #1a1f2e;
-    --agent-border: #2a3145;
-    --text: #e8eaf0;
-    --text2: #8892a4;
-    --text3: #4f5a6e;
-    --green: #4ade80;
-    --red: #f87171;
-    --yellow: #fbbf24;
-    --radius: 18px;
-    --radius-sm: 10px;
-    --font: 'Sora', sans-serif;
-    --mono: 'JetBrains Mono', monospace;
-  }
+:root {
+  --bg:           #0b0d12;
+  --surface:      #13161f;
+  --surface2:     #1a1e2b;
+  --surface3:     #222637;
+  --border:       #272d40;
+  --accent:       #7c6af7;
+  --accent2:      #a78bfa;
+  --accent-dim:   rgba(124,106,247,0.15);
+  --user-bg:      #1e1854;
+  --user-border:  #4c40c0;
+  --agent-bg:     #13161f;
+  --agent-border: #272d40;
+  --push-bg:      #0d2218;
+  --push-border:  #1a5c38;
+  --push-color:   #4ade80;
+  --text:         #dde1ed;
+  --text2:        #7a849a;
+  --text3:        #3d4558;
+  --green:        #4ade80;
+  --red:          #f87171;
+  --yellow:       #fbbf24;
+  --radius:       16px;
+  --radius-sm:    10px;
+  --font:         'Sora', sans-serif;
+  --mono:         'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+html,body{
+  height:100dvh;overflow:hidden;
+  font-family:var(--font);
+  background:var(--bg);color:var(--text);
+  display:flex;flex-direction:column;
+}
 
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+/* ── HEADER ── */
+.header{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;z-index:20;
+}
+.logo{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#c084fc);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  box-shadow:0 0 18px var(--accent-dim);
+}
+.header-info{flex:1;min-width:0}
+.header-name{font-size:14px;font-weight:600;line-height:1.2}
+.header-sub{
+  font-size:11px;color:var(--text2);
+  display:flex;align-items:center;gap:5px;margin-top:2px;
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+  background:var(--text3);transition:background .3s,box-shadow .3s;
+}
+.dot.online{background:var(--green);box-shadow:0 0 7px var(--green)}
+.dot.thinking{background:var(--yellow);box-shadow:0 0 7px var(--yellow);animation:blink 1s infinite}
+.hdr-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.hdr-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--accent)}
 
-  /* ── Header ── */
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-  }
+/* ── CONNECT BAR ── */
+.connect-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 14px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.connect-bar input{
+  flex:1;background:var(--surface3);
+  border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--mono);font-size:11.5px;
+  padding:6px 10px;outline:none;transition:border-color .2s;
+}
+.connect-bar input:focus{border-color:var(--accent)}
+.connect-bar input::placeholder{color:var(--text3)}
+.conn-btn{
+  padding:6px 14px;border-radius:8px;
+  background:var(--accent);color:#fff;
+  border:none;font-family:var(--font);font-size:12px;
+  font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.conn-btn:hover{background:var(--accent2)}
+.conn-btn.ok{background:#166534;color:#bbf7d0}
 
-  .avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #c084fc);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-    box-shadow: 0 0 20px var(--accent-glow);
-  }
+/* ── MESSAGES ── */
+.msgs{
+  flex:1;overflow-y:auto;
+  padding:16px 12px 8px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
 
-  .header-info { flex: 1; }
-  .header-name { font-size: 15px; font-weight: 600; }
-  .header-status {
-    font-size: 12px; color: var(--text2);
-    display: flex; align-items: center; gap: 5px;
-  }
-  .status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-  }
-  .status-dot.thinking { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse 1s infinite; }
-  .status-dot.offline { background: var(--text3); box-shadow: none; }
+/* message row */
+.row{display:flex;align-items:flex-end;gap:8px;animation:fadeUp .22s ease}
+.row.user{flex-direction:row-reverse}
+.row+.row.user,.row+.row.agent{margin-top:2px}
 
-  .header-actions { display: flex; gap: 8px; }
-  .icon-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: transparent; border: 1px solid var(--border);
-    color: var(--text2); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; transition: all 0.2s;
-  }
-  .icon-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--accent); }
+.av{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.av.agent{background:linear-gradient(135deg,var(--accent),#c084fc);box-shadow:0 0 8px var(--accent-dim)}
+.av.user{background:var(--surface3)}
+.av.push{background:var(--push-bg);border:1px solid var(--push-border)}
 
-  /* ── Config bar (HF URL) ── */
-  .config-bar {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 16px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .config-bar input {
-    flex: 1; background: var(--surface3);
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    color: var(--text); font-family: var(--mono); font-size: 12px;
-    padding: 6px 10px; outline: none;
-    transition: border-color 0.2s;
-  }
-  .config-bar input:focus { border-color: var(--accent); }
-  .config-bar input::placeholder { color: var(--text3); }
-  .connect-btn {
-    padding: 6px 14px; border-radius: var(--radius-sm);
-    background: var(--accent); color: #fff;
-    border: none; font-family: var(--font); font-size: 12px;
-    font-weight: 600; cursor: pointer; transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .connect-btn:hover { background: var(--accent2); }
-  .connect-btn.connected { background: var(--green); color: #000; }
+.col{display:flex;flex-direction:column;gap:3px;max-width:min(74%,500px)}
+.row.user .col{align-items:flex-end}
+.row.agent .col,.row.push .col{align-items:flex-start}
 
-  /* ── Messages ── */
-  .messages {
-    flex: 1; overflow-y: auto;
-    padding: 20px 16px;
-    display: flex; flex-direction: column; gap: 4px;
-    scroll-behavior: smooth;
-  }
+.bubble{
+  padding:9px 13px;border-radius:var(--radius);
+  font-size:13.5px;line-height:1.55;word-break:break-word;
+  position:relative;
+}
+.bubble.agent{background:var(--agent-bg);border:1px solid var(--agent-border);border-bottom-left-radius:3px}
+.bubble.user {background:var(--user-bg);border:1px solid var(--user-border);border-bottom-right-radius:3px}
+.bubble.push {background:var(--push-bg);border:1px solid var(--push-border);border-bottom-left-radius:3px;color:var(--push-color)}
+.bubble.error{background:#1a0a0a;border:1px solid #7f1d1d;color:var(--red);border-bottom-left-radius:3px}
 
-  .messages::-webkit-scrollbar { width: 4px; }
-  .messages::-webkit-scrollbar-track { background: transparent; }
-  .messages::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+/* markdown inside agent bubble */
+.bubble.agent p{margin-bottom:7px}
+.bubble.agent p:last-child{margin-bottom:0}
+.bubble.agent code{font-family:var(--mono);font-size:11.5px;background:rgba(124,106,247,.12);padding:1px 5px;border-radius:4px;color:var(--accent2)}
+.bubble.agent pre{background:#080a10;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;overflow-x:auto;margin:7px 0;font-family:var(--mono);font-size:11.5px;line-height:1.5}
+.bubble.agent pre code{background:none;padding:0;color:var(--text)}
+.bubble.agent ul,.bubble.agent ol{padding-left:18px;margin:5px 0}
+.bubble.agent li{margin-bottom:3px}
+.bubble.agent strong{color:var(--accent2);font-weight:600}
+.bubble.agent h1,.bubble.agent h2,.bubble.agent h3{color:var(--accent2);margin:9px 0 5px;font-weight:600}
+.bubble.agent blockquote{border-left:3px solid var(--accent);padding-left:10px;color:var(--text2);margin:6px 0}
+.bubble.agent a{color:var(--accent2);text-decoration:underline}
+.bubble.agent hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
-  .msg-group { display: flex; flex-direction: column; margin-bottom: 6px; }
+.ts{font-size:10px;color:var(--text3);padding:0 4px}
 
-  .msg-row {
-    display: flex; align-items: flex-end; gap: 8px;
-    margin-bottom: 2px;
-  }
-  .msg-row.user { flex-direction: row-reverse; }
+/* streaming cursor */
+.cursor{
+  display:inline-block;width:2px;height:14px;
+  background:var(--accent2);margin-left:2px;vertical-align:middle;
+  animation:blink 0.7s infinite;
+}
 
-  .msg-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    flex-shrink: 0; display: flex; align-items: center;
-    justify-content: center; font-size: 13px;
-  }
-  .msg-avatar.agent {
-    background: linear-gradient(135deg, var(--accent), #c084fc);
-    box-shadow: 0 0 10px var(--accent-glow);
-  }
-  .msg-avatar.user { background: var(--surface3); }
+/* file attachment */
+.attach-card{
+  display:flex;align-items:center;gap:9px;
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:9px 12px;
+  max-width:260px;cursor:default;
+}
+.attach-icon{font-size:22px;flex-shrink:0}
+.attach-body{flex:1;min-width:0}
+.attach-name{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.attach-size{font-size:10.5px;color:var(--text2);margin-top:2px}
+.preview-img{max-width:240px;border-radius:var(--radius-sm);display:block}
+.preview-audio{width:240px;accent-color:var(--accent);margin:2px 0}
+.preview-video{max-width:280px;border-radius:var(--radius-sm)}
 
-  .bubble {
-    max-width: min(72%, 520px);
-    padding: 10px 14px;
-    border-radius: var(--radius);
-    font-size: 14px; line-height: 1.55;
-    position: relative; word-wrap: break-word;
-  }
+/* typing indicator */
+.typing-row{display:flex;align-items:flex-end;gap:8px;animation:fadeUp .2s ease}
+.typing-bubble{
+  background:var(--agent-bg);border:1px solid var(--agent-border);
+  border-radius:var(--radius);border-bottom-left-radius:3px;
+  padding:11px 15px;display:flex;align-items:center;gap:5px;
+}
+.typing-bubble span{
+  width:7px;height:7px;border-radius:50%;background:var(--accent);
+  animation:bounce 1.3s ease-in-out infinite;display:block;
+}
+.typing-bubble span:nth-child(2){animation-delay:.15s}
+.typing-bubble span:nth-child(3){animation-delay:.3s}
 
-  .bubble.agent {
-    background: var(--agent-bubble);
-    border: 1px solid var(--agent-border);
-    border-bottom-left-radius: 4px;
-  }
+/* sys msg */
+.sys{text-align:center;font-size:11px;color:var(--text3);padding:6px 0;margin:6px 0}
 
-  .bubble.user {
-    background: var(--user-bubble);
-    border: 1px solid var(--user-border);
-    border-bottom-right-radius: 4px;
-    text-align: left;
-  }
+/* empty */
+.empty{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:14px;opacity:.45;padding:40px;text-align:center;
+}
+.empty-icon{font-size:44px}
+.empty h2{font-size:18px;font-weight:600}
+.empty p{font-size:13px;color:var(--text2);max-width:280px;line-height:1.5}
 
-  .bubble.agent p { margin-bottom: 8px; }
-  .bubble.agent p:last-child { margin-bottom: 0; }
+/* ── INPUT AREA ── */
+.input-area{
+  padding:10px 12px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip-row:empty{display:none}
+.chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:7px;padding:4px 9px;font-size:11.5px;
+}
+.chip-thumb{width:24px;height:24px;border-radius:4px;object-fit:cover}
+.chip-name{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-rm{cursor:pointer;color:var(--text3);font-size:13px;transition:color .2s}
+.chip-rm:hover{color:var(--red)}
 
-  .bubble.agent code {
-    font-family: var(--mono); font-size: 12px;
-    background: rgba(124,106,247,0.1);
-    padding: 1px 5px; border-radius: 4px;
-    color: var(--accent2);
-  }
+.rec-row{
+  display:none;align-items:center;gap:7px;
+  color:var(--red);font-size:12.5px;font-weight:500;padding:4px 0 8px;
+}
+.rec-row.on{display:flex}
+.rec-dot{width:9px;height:9px;border-radius:50%;background:var(--red);animation:blink 1s infinite}
+.rec-stop{
+  background:none;border:1px solid var(--red);
+  color:var(--red);border-radius:6px;padding:2px 8px;
+  cursor:pointer;font-size:11px;font-family:var(--font);
+}
 
-  .bubble.agent pre {
-    background: #0a0c12; border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 12px;
-    overflow-x: auto; margin: 8px 0;
-    font-family: var(--mono); font-size: 12px;
-    line-height: 1.5;
-  }
+.input-row{display:flex;align-items:flex-end;gap:7px}
 
-  .bubble.agent pre code {
-    background: none; padding: 0; color: var(--text);
-  }
+.attach-group{display:flex;gap:4px;flex-shrink:0}
+.ab{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--surface3);border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;position:relative;flex-shrink:0;
+}
+.ab:hover{background:var(--surface2);color:var(--accent);border-color:var(--accent)}
+.ab input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 
-  .bubble.agent ul, .bubble.agent ol {
-    padding-left: 18px; margin: 6px 0;
-  }
+.txt-wrap{
+  flex:1;background:var(--surface3);
+  border:1px solid var(--border);border-radius:20px;
+  display:flex;align-items:flex-end;
+  padding:6px 6px 6px 13px;transition:border-color .2s;
+}
+.txt-wrap:focus-within{border-color:var(--accent)}
+#inp{
+  flex:1;background:transparent;border:none;
+  color:var(--text);font-family:var(--font);font-size:13.5px;
+  resize:none;outline:none;max-height:110px;overflow-y:auto;
+  line-height:1.4;padding:3px 0;
+}
+#inp::placeholder{color:var(--text3)}
+#inp::-webkit-scrollbar{width:2px}
 
-  .bubble.agent li { margin-bottom: 3px; }
+.send-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--accent);border:none;color:#fff;
+  cursor:pointer;flex-shrink:0;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;margin-left:3px;
+}
+.send-btn:hover{background:var(--accent2);transform:scale(1.06)}
+.send-btn:disabled{background:var(--surface3);color:var(--text3);cursor:not-allowed;transform:none}
 
-  .bubble.agent strong { color: var(--accent2); font-weight: 600; }
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:82px;left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;padding:8px 16px;font-size:12.5px;
+  opacity:0;transition:all .28s;z-index:200;pointer-events:none;white-space:nowrap;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{border-color:var(--red);color:var(--red)}
+.toast.ok{border-color:var(--green);color:var(--green)}
 
-  .bubble.agent h1, .bubble.agent h2, .bubble.agent h3 {
-    color: var(--accent2); margin: 10px 0 6px;
-    font-weight: 600;
-  }
+/* ── KEYFRAMES ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 
-  .msg-time {
-    font-size: 10px; color: var(--text3);
-    padding: 0 4px; margin-top: 2px;
-    text-align: right;
-  }
-  .msg-row.user .msg-time { text-align: right; padding-right: 36px; }
-  .msg-row.agent .msg-time { text-align: left; padding-left: 36px; }
-
-  /* File/media attachment bubble */
-  .attachment {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px;
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    margin-bottom: 6px; max-width: 280px;
-  }
-  .attachment-icon { font-size: 24px; flex-shrink: 0; }
-  .attachment-info { flex: 1; min-width: 0; }
-  .attachment-name {
-    font-size: 13px; font-weight: 500;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .attachment-size { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-  /* Image preview in bubble */
-  .bubble img.preview {
-    max-width: 100%; border-radius: var(--radius-sm);
-    display: block; margin-bottom: 6px;
-  }
-
-  /* Audio player */
-  .bubble audio {
-    width: 100%; margin-bottom: 6px;
-    accent-color: var(--accent);
-  }
-
-  /* Typing indicator */
-  .typing-bubble {
-    background: var(--agent-bubble);
-    border: 1px solid var(--agent-border);
-    border-radius: var(--radius); border-bottom-left-radius: 4px;
-    padding: 12px 16px;
-    display: flex; align-items: center; gap: 5px;
-    width: fit-content;
-  }
-  .typing-bubble .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--accent);
-    animation: typing 1.4s ease-in-out infinite;
-  }
-  .typing-bubble .dot:nth-child(2) { animation-delay: 0.2s; }
-  .typing-bubble .dot:nth-child(3) { animation-delay: 0.4s; }
-
-  /* System message */
-  .sys-msg {
-    text-align: center; font-size: 12px; color: var(--text3);
-    padding: 4px 0; margin: 8px 0;
-  }
-
-  /* ── Input area ── */
-  .input-area {
-    padding: 12px 16px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  /* Attachment preview strip */
-  .attachment-preview {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    margin-bottom: 10px;
-  }
-  .attachment-preview:empty { display: none; }
-
-  .preview-chip {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--surface3); border: 1px solid var(--border);
-    border-radius: 8px; padding: 5px 10px;
-    font-size: 12px; max-width: 200px;
-  }
-  .preview-chip-name {
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 140px;
-  }
-  .preview-chip-remove {
-    cursor: pointer; color: var(--text3); font-size: 14px;
-    flex-shrink: 0; transition: color 0.2s;
-  }
-  .preview-chip-remove:hover { color: var(--red); }
-
-  .preview-img-thumb {
-    width: 28px; height: 28px; border-radius: 4px;
-    object-fit: cover; flex-shrink: 0;
-  }
-
-  .input-row {
-    display: flex; align-items: flex-end; gap: 8px;
-  }
-
-  .attach-area {
-    display: flex; gap: 4px; flex-shrink: 0;
-  }
-
-  .attach-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--surface3); border: 1px solid var(--border);
-    color: var(--text2); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; transition: all 0.2s;
-    position: relative;
-  }
-  .attach-btn:hover { background: var(--surface2); color: var(--accent); border-color: var(--accent); }
-  .attach-btn input[type=file] {
-    position: absolute; inset: 0; opacity: 0;
-    cursor: pointer; width: 100%; height: 100%;
-  }
-
-  .text-input-wrap {
-    flex: 1;
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    display: flex; align-items: flex-end;
-    padding: 6px 6px 6px 14px;
-    transition: border-color 0.2s;
-    min-height: 44px;
-  }
-  .text-input-wrap:focus-within { border-color: var(--accent); }
-
-  #messageInput {
-    flex: 1; background: transparent; border: none;
-    color: var(--text); font-family: var(--font); font-size: 14px;
-    resize: none; outline: none; max-height: 120px;
-    overflow-y: auto; line-height: 1.4;
-    padding: 4px 0;
-  }
-  #messageInput::placeholder { color: var(--text3); }
-  #messageInput::-webkit-scrollbar { width: 3px; }
-  #messageInput::-webkit-scrollbar-thumb { background: var(--surface2); }
-
-  .send-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: var(--accent); border: none;
-    color: #fff; cursor: pointer; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; transition: all 0.2s;
-    margin-left: 4px;
-  }
-  .send-btn:hover { background: var(--accent2); transform: scale(1.05); }
-  .send-btn:disabled { background: var(--surface3); color: var(--text3); cursor: not-allowed; transform: none; }
-
-  /* Recording indicator */
-  .recording-indicator {
-    display: none; align-items: center; gap: 8px;
-    color: var(--red); font-size: 13px; font-weight: 500;
-    padding: 8px 0;
-  }
-  .recording-indicator.active { display: flex; }
-  .rec-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--red); animation: pulse 1s infinite;
-  }
-
-  /* ── Animations ── */
-  @keyframes typing {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-6px); opacity: 1; }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .msg-row { animation: fadeIn 0.25s ease; }
-
-  /* ── Empty state ── */
-  .empty-state {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 16px; opacity: 0.5; padding: 40px;
-    text-align: center;
-  }
-  .empty-state-icon { font-size: 48px; }
-  .empty-state h2 { font-size: 20px; font-weight: 600; }
-  .empty-state p { font-size: 14px; color: var(--text2); max-width: 300px; line-height: 1.5; }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 18px;
-    font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 100;
-    pointer-events: none; white-space: nowrap;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.error { border-color: var(--red); color: var(--red); }
-  .toast.success { border-color: var(--green); color: var(--green); }
-
-  /* ── Mobile ── */
-  @media (max-width: 600px) {
-    .bubble { max-width: 85%; font-size: 13px; }
-    .config-bar { flex-wrap: wrap; }
-  }
+/* ── MOBILE ── */
+@media(max-width:540px){
+  .col{max-width:86%}
+  .bubble{font-size:13px}
+  .connect-bar{flex-wrap:wrap}
+}
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
-  <div class="avatar">⚕</div>
+  <div class="logo">⚕</div>
   <div class="header-info">
     <div class="header-name">Hermes Agent</div>
-    <div class="header-status">
-      <div class="status-dot offline" id="statusDot"></div>
-      <span id="statusText">Not connected</span>
+    <div class="header-sub">
+      <div class="dot" id="dot"></div>
+      <span id="sub">Not connected</span>
     </div>
   </div>
-  <div class="header-actions">
-    <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑</button>
-    <button class="icon-btn" onclick="resetSession()" title="New session">✦</button>
-  </div>
+  <button class="hdr-btn" onclick="newSession()" title="New session">✦</button>
+  <button class="hdr-btn" onclick="clearUI()" title="Clear chat">🗑</button>
 </div>
 
-<!-- Config bar -->
-<div class="config-bar">
-  <input type="text" id="hfUrl" placeholder="https://your-username-your-space.hf.space"
-    value="" spellcheck="false" />
-  <button class="connect-btn" id="connectBtn" onclick="connect()">Connect</button>
+<div class="connect-bar">
+  <input id="urlInput" type="text" placeholder="https://your-username-space-name.hf.space" spellcheck="false" />
+  <button class="conn-btn" id="connBtn" onclick="connect()">Connect</button>
 </div>
 
-<!-- Messages -->
-<div class="messages" id="messages">
-  <div class="empty-state" id="emptyState">
-    <div class="empty-state-icon">⚕</div>
+<div class="msgs" id="msgs">
+  <div class="empty" id="empty">
+    <div class="empty-icon">⚕</div>
     <h2>Hermes Agent</h2>
-    <p>Connect to your Hugging Face Space above, then start a conversation. Supports text, images, documents, audio, and video.</p>
+    <p>Paste your Hugging Face Space URL above and connect. Supports text, images, files, audio, and video.</p>
   </div>
 </div>
 
-<!-- Input area -->
 <div class="input-area">
-  <div class="attachment-preview" id="attachmentPreview"></div>
-  <div class="recording-indicator" id="recordingIndicator">
+  <div class="chip-row" id="chipRow"></div>
+  <div class="rec-row" id="recRow">
     <div class="rec-dot"></div>
-    <span id="recordingTime">Recording… 0s</span>
-    <button onclick="stopRecording()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;font-weight:600;">Stop</button>
+    <span id="recTime">0s</span>
+    <button class="rec-stop" onclick="stopRec()">Stop</button>
   </div>
   <div class="input-row">
-    <div class="attach-area">
-      <!-- Image/file picker -->
-      <label class="attach-btn" title="Attach file">
-        📎
-        <input type="file" id="fileInput" accept="*/*" onchange="handleFileSelect(event)" />
+    <div class="attach-group">
+      <label class="ab" title="Attach any file">
+        📎<input type="file" id="anyFile" accept="*/*" onchange="pickFile(event)">
       </label>
-      <!-- Camera/image -->
-      <label class="attach-btn" title="Image">
-        🖼️
-        <input type="file" id="imageInput" accept="image/*" onchange="handleFileSelect(event)" />
+      <label class="ab" title="Image">
+        🖼️<input type="file" id="imgFile" accept="image/*" onchange="pickFile(event)">
       </label>
-      <!-- Voice record -->
-      <button class="attach-btn" title="Voice note" onclick="toggleRecording()">🎙️</button>
+      <button class="ab" title="Voice note" onclick="toggleRec()">🎙️</button>
     </div>
-
-    <div class="text-input-wrap">
-      <textarea id="messageInput" placeholder="Message Hermes…" rows="1"
-        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <div class="txt-wrap">
+      <textarea id="inp" rows="1" placeholder="Message Hermes…"
+        onkeydown="onKey(event)" oninput="resize(this)"></textarea>
     </div>
-
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
-      ➤
-    </button>
+    <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── State ────────────────────────────────────────────────────────────────────
-let HF_BASE = '';
-let SESSION_ID = 'session_' + Math.random().toString(36).slice(2, 10);
-let isConnected = false;
-let isThinking = false;
+// ─── State ────────────────────────────────────────────────────────────────────
+let WS_BASE = '';          // wss://...
+let HTTP_BASE = '';        // https://...
+let ws = null;
+let sessionId = newSid();
+let connected = false;
+let agentTyping = false;
 let pendingFile = null;
-let mediaRecorder = null;
-let recordingChunks = [];
-let recordingTimer = null;
-let recordingSeconds = 0;
+let mediaRec = null;
+let recChunks = [];
+let recSecs = 0;
+let recTimer = null;
 
-// ── Load saved URL ────────────────────────────────────────────────────────────
+// Streaming state
+let streamBubbles = {};    // msg_id → {col, bubble, textSoFar}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem('hermes_hf_url');
-  if (saved) {
-    document.getElementById('hfUrl').value = saved;
-  }
+  const saved = localStorage.getItem('hermes_url');
+  if (saved) document.getElementById('urlInput').value = saved;
 });
 
-// ── Connect ────────────────────────────────────────────────────────────────
-async function connect() {
-  const url = document.getElementById('hfUrl').value.trim().replace(/\/$/, '');
-  if (!url) { showToast('Enter your HF Space URL', 'error'); return; }
+function newSid() {
+  return 'sid_' + Math.random().toString(36).slice(2, 11);
+}
 
-  HF_BASE = url;
-  localStorage.setItem('hermes_hf_url', url);
+// ─── Connect ──────────────────────────────────────────────────────────────────
+function connect() {
+  let url = document.getElementById('urlInput').value.trim().replace(/\/$/, '');
+  if (!url) { toast('Enter your HF Space URL', 'err'); return; }
 
-  const btn = document.getElementById('connectBtn');
-  btn.textContent = 'Connecting…';
-  btn.disabled = true;
+  localStorage.setItem('hermes_url', url);
+  HTTP_BASE = url;
+  WS_BASE   = url.replace(/^https?/, match => match === 'https' ? 'wss' : 'ws');
 
-  try {
-    const res = await fetch(`${HF_BASE}/`, { signal: AbortSignal.timeout(8000) });
-    const data = await res.json();
-    if (res.ok) {
-      isConnected = true;
-      setStatus('online', `Connected · ${data.model || 'Hermes'}`);
-      btn.textContent = 'Connected';
-      btn.classList.add('connected');
-      hideEmptyState();
-      addSysMsg(`Connected to Hermes Agent · Model: ${data.model || 'unknown'}`);
-      showToast('Connected!', 'success');
-    } else {
-      throw new Error('Bad response');
-    }
-  } catch (e) {
-    setStatus('offline', 'Connection failed');
-    btn.textContent = 'Connect';
-    btn.disabled = false;
-    showToast('Could not connect — check URL', 'error');
+  setStatus('thinking', 'Connecting…');
+  openWS();
+}
+
+function openWS() {
+  if (ws) { try { ws.close(); } catch(e){} }
+
+  ws = new WebSocket(`${WS_BASE}/ws/${sessionId}`);
+
+  ws.onopen = () => {
+    // WS open — wait for server "connected" message
+  };
+
+  ws.onmessage = (e) => {
+    let msg;
+    try { msg = JSON.parse(e.data); } catch { return; }
+    handleServerMsg(msg);
+  };
+
+  ws.onclose = () => {
+    connected = false;
+    setStatus('offline', 'Disconnected — reconnecting…');
+    document.getElementById('connBtn').textContent = 'Reconnect';
+    document.getElementById('connBtn').classList.remove('ok');
+    document.getElementById('connBtn').disabled = false;
+    setTimeout(openWS, 3000);
+  };
+
+  ws.onerror = () => {
+    setStatus('offline', 'Connection error');
+  };
+}
+
+// ─── Server message handler ───────────────────────────────────────────────────
+function handleServerMsg(msg) {
+  switch (msg.type) {
+
+    case 'connected':
+      connected = true;
+      setStatus('online', `Connected · ${msg.model || 'Hermes'}`);
+      document.getElementById('connBtn').textContent = 'Connected';
+      document.getElementById('connBtn').classList.add('ok');
+      document.getElementById('connBtn').disabled = false;
+      hideEmpty();
+      sysMsg(`Session started · ${msg.model}`);
+      // Replay history
+      if (msg.history && msg.history.length) {
+        msg.history.forEach(m => {
+          if (m.role === 'user') addUserBubble(m.content, null, true);
+          else if (m.role === 'assistant') addAgentBubble(m.content, true);
+        });
+      }
+      toast('Connected!', 'ok');
+      break;
+
+    case 'user':
+      // Echo of our own message (or another tab)
+      addUserBubble(msg.text, null, true);
+      break;
+
+    case 'user_file':
+      addUserFileBubble(msg.filename, msg.mime, msg.text);
+      break;
+
+    case 'agent_typing':
+      showTyping();
+      agentTyping = true;
+      setStatus('thinking', 'Thinking…');
+      break;
+
+    case 'agent_ready':
+      hideTyping();
+      agentTyping = false;
+      setStatus('online', 'Connected · Ready');
+      break;
+
+    case 'stream_start':
+      hideTyping();
+      startStreamBubble(msg.id, msg.ts);
+      break;
+
+    case 'stream_delta':
+      appendStreamDelta(msg.id, msg.delta);
+      break;
+
+    case 'stream_end':
+      endStreamBubble(msg.id);
+      break;
+
+    case 'push':
+      addPushBubble(msg.text, msg.ts);
+      break;
+
+    case 'error':
+      hideTyping();
+      addErrorBubble(msg.text);
+      agentTyping = false;
+      setStatus('online', 'Connected · Ready');
+      break;
+
+    case 'reset':
+      clearUI();
+      sysMsg('Session reset');
+      break;
+
+    case 'pong':
+      break;
   }
 }
 
-// ── File handling ──────────────────────────────────────────────────────────
-function handleFileSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  pendingFile = file;
-  showAttachmentPreview(file);
-  event.target.value = '';
-}
+// ─── Send ─────────────────────────────────────────────────────────────────────
+async function send() {
+  if (!connected) { toast('Not connected', 'err'); return; }
 
-function showAttachmentPreview(file) {
-  const preview = document.getElementById('attachmentPreview');
-  preview.innerHTML = '';
-  const chip = document.createElement('div');
-  chip.className = 'preview-chip';
-
-  if (file.type.startsWith('image/')) {
-    const img = document.createElement('img');
-    img.className = 'preview-img-thumb';
-    img.src = URL.createObjectURL(file);
-    chip.appendChild(img);
-  } else {
-    const icon = document.createElement('span');
-    icon.textContent = getFileIcon(file);
-    chip.appendChild(icon);
-  }
-
-  const name = document.createElement('span');
-  name.className = 'preview-chip-name';
-  name.textContent = file.name;
-  chip.appendChild(name);
-
-  const rm = document.createElement('span');
-  rm.className = 'preview-chip-remove';
-  rm.textContent = '✕';
-  rm.onclick = () => { pendingFile = null; preview.innerHTML = ''; };
-  chip.appendChild(rm);
-
-  preview.appendChild(chip);
-}
-
-function getFileIcon(file) {
-  const t = file.type;
-  if (t.startsWith('image/')) return '🖼️';
-  if (t.startsWith('audio/')) return '🎵';
-  if (t.startsWith('video/')) return '🎬';
-  if (t === 'application/pdf') return '📄';
-  if (t.includes('word') || file.name.endsWith('.docx')) return '📝';
-  if (t.includes('sheet') || file.name.endsWith('.xlsx')) return '📊';
-  if (t.startsWith('text/')) return '📃';
-  return '📎';
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
-}
-
-// ── Voice recording ────────────────────────────────────────────────────────
-async function toggleRecording() {
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-    stopRecording();
-  } else {
-    startRecording();
-  }
-}
-
-async function startRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    recordingChunks = [];
-    recordingSeconds = 0;
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordingChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordingChunks, { type: 'audio/webm' });
-      const file = new File([blob], `voice_${Date.now()}.webm`, { type: 'audio/webm' });
-      pendingFile = file;
-      showAttachmentPreview(file);
-      stream.getTracks().forEach(t => t.stop());
-    };
-    mediaRecorder.start();
-    document.getElementById('recordingIndicator').classList.add('active');
-    recordingTimer = setInterval(() => {
-      recordingSeconds++;
-      document.getElementById('recordingTime').textContent = `Recording… ${recordingSeconds}s`;
-    }, 1000);
-  } catch (e) {
-    showToast('Microphone access denied', 'error');
-  }
-}
-
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-    mediaRecorder.stop();
-  }
-  clearInterval(recordingTimer);
-  document.getElementById('recordingIndicator').classList.remove('active');
-}
-
-// ── Send message ──────────────────────────────────────────────────────────
-async function sendMessage() {
-  if (!isConnected) { showToast('Connect to your HF Space first', 'error'); return; }
-  if (isThinking) return;
-
-  const input = document.getElementById('messageInput');
-  const text = input.value.trim();
+  const inp  = document.getElementById('inp');
+  const text = inp.value.trim();
   const file = pendingFile;
 
   if (!text && !file) return;
 
-  // Clear input
-  input.value = '';
-  autoResize(input);
+  inp.value = '';
+  resize(inp);
   pendingFile = null;
-  document.getElementById('attachmentPreview').innerHTML = '';
-
-  // Show user message
-  addUserMessage(text, file);
-
-  // Show typing
-  showTyping();
-  setStatus('thinking', 'Thinking…');
-  isThinking = true;
-  document.getElementById('sendBtn').disabled = true;
-
-  try {
-    const formData = new FormData();
-    if (text) formData.append('text', text);
-    if (file) formData.append('file', file);
-
-    const res = await fetch(`${HF_BASE}/chat/${SESSION_ID}`, {
-      method: 'POST',
-      body: formData,
-      signal: AbortSignal.timeout(120000), // 2 min timeout for agent tasks
-    });
-
-    const data = await res.json();
-    hideTyping();
-
-    if (data.ok) {
-      addAgentMessage(data.reply);
-      setStatus('online', 'Connected · Ready');
-    } else {
-      addAgentMessage(`⚠️ Error: ${data.error || 'Unknown error'}`);
-      setStatus('online', 'Connected · Ready');
-    }
-  } catch (e) {
-    hideTyping();
-    if (e.name === 'TimeoutError') {
-      addAgentMessage('⏱️ Request timed out. The agent may still be working — try again.');
-    } else {
-      addAgentMessage(`❌ Failed to reach Hermes: ${e.message}`);
-      setStatus('offline', 'Connection lost');
-      isConnected = false;
-      document.getElementById('connectBtn').textContent = 'Reconnect';
-      document.getElementById('connectBtn').classList.remove('connected');
-      document.getElementById('connectBtn').disabled = false;
-    }
-  }
-
-  isThinking = false;
-  document.getElementById('sendBtn').disabled = false;
-}
-
-// ── Message rendering ─────────────────────────────────────────────────────
-function addUserMessage(text, file) {
-  const container = document.getElementById('messages');
-  const row = document.createElement('div');
-  row.className = 'msg-row user';
-
-  const avatar = document.createElement('div');
-  avatar.className = 'msg-avatar user';
-  avatar.textContent = '👤';
-
-  const col = document.createElement('div');
-  col.style.display = 'flex';
-  col.style.flexDirection = 'column';
-  col.style.alignItems = 'flex-end';
-  col.style.gap = '4px';
+  document.getElementById('chipRow').innerHTML = '';
 
   if (file) {
-    const attach = document.createElement('div');
-    attach.className = 'attachment';
-    attach.style.maxWidth = '280px';
-
-    if (file.type.startsWith('image/')) {
-      const img = document.createElement('img');
-      img.className = 'preview';
-      img.src = URL.createObjectURL(file);
-      img.style.maxWidth = '220px';
-      img.style.borderRadius = '12px';
-      col.appendChild(img);
-    } else if (file.type.startsWith('audio/')) {
-      const audio = document.createElement('audio');
-      audio.controls = true;
-      audio.src = URL.createObjectURL(file);
-      audio.style.maxWidth = '260px';
-      col.appendChild(audio);
-    } else if (file.type.startsWith('video/')) {
-      const video = document.createElement('video');
-      video.controls = true;
-      video.src = URL.createObjectURL(file);
-      video.style.maxWidth = '280px';
-      video.style.borderRadius = '12px';
-      col.appendChild(video);
-    } else {
-      attach.innerHTML = `
-        <span class="attachment-icon">${getFileIcon(file)}</span>
-        <div class="attachment-info">
-          <div class="attachment-name">${escHtml(file.name)}</div>
-          <div class="attachment-size">${formatSize(file.size)}</div>
-        </div>`;
-      col.appendChild(attach);
-    }
-  }
-
-  if (text) {
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble user';
-    bubble.textContent = text;
-    col.appendChild(bubble);
-  }
-
-  const time = document.createElement('div');
-  time.className = 'msg-time';
-  time.textContent = now();
-  col.appendChild(time);
-
-  row.appendChild(col);
-  row.appendChild(avatar);
-  container.appendChild(row);
-  scrollBottom();
-}
-
-function addAgentMessage(text) {
-  const container = document.getElementById('messages');
-  const row = document.createElement('div');
-  row.className = 'msg-row agent';
-
-  const avatar = document.createElement('div');
-  avatar.className = 'msg-avatar agent';
-  avatar.textContent = '⚕';
-
-  const col = document.createElement('div');
-  col.style.display = 'flex';
-  col.style.flexDirection = 'column';
-  col.style.gap = '4px';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble agent';
-  bubble.innerHTML = renderMarkdown(text);
-
-  const time = document.createElement('div');
-  time.className = 'msg-time';
-  time.textContent = now();
-
-  col.appendChild(bubble);
-  col.appendChild(time);
-  row.appendChild(avatar);
-  row.appendChild(col);
-  container.appendChild(row);
-  scrollBottom();
-}
-
-function addSysMsg(text) {
-  const container = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'sys-msg';
-  div.textContent = text;
-  container.appendChild(div);
-  scrollBottom();
-}
-
-// ── Typing indicator ──────────────────────────────────────────────────────
-let typingEl = null;
-function showTyping() {
-  const container = document.getElementById('messages');
-  const row = document.createElement('div');
-  row.className = 'msg-row agent';
-  row.id = 'typingRow';
-
-  const avatar = document.createElement('div');
-  avatar.className = 'msg-avatar agent';
-  avatar.textContent = '⚕';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'typing-bubble';
-  bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-
-  row.appendChild(avatar);
-  row.appendChild(bubble);
-  container.appendChild(row);
-  scrollBottom();
-}
-
-function hideTyping() {
-  const el = document.getElementById('typingRow');
-  if (el) el.remove();
-}
-
-// ── Markdown renderer (simple) ────────────────────────────────────────────
-function renderMarkdown(text) {
-  // Escape HTML first
-  let html = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-  // Code blocks
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
-    `<pre><code class="lang-${lang}">${code.trim()}</code></pre>`);
-
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-  // Bold
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-  // Italic
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-  // Headers
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-
-  // Unordered list
-  html = html.replace(/^\- (.+)$/gm, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-
-  // Ordered list
-  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
-
-  // Paragraphs (double newline → paragraph break)
-  html = html.split(/\n\n+/).map(p =>
-    p.startsWith('<') ? p : `<p>${p.replace(/\n/g, '<br>')}</p>`
-  ).join('');
-
-  return html;
-}
-
-// ── Utilities ─────────────────────────────────────────────────────────────
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function now() {
-  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-function scrollBottom() {
-  const c = document.getElementById('messages');
-  c.scrollTop = c.scrollHeight;
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-function setStatus(state, text) {
-  const dot = document.getElementById('statusDot');
-  const label = document.getElementById('statusText');
-  dot.className = 'status-dot ' + (state === 'online' ? '' : state === 'thinking' ? 'thinking' : 'offline');
-  label.textContent = text;
-}
-
-function hideEmptyState() {
-  const el = document.getElementById('emptyState');
-  if (el) el.remove();
-}
-
-function clearChat() {
-  const container = document.getElementById('messages');
-  container.innerHTML = '';
-  if (!isConnected) {
-    container.innerHTML = `
-      <div class="empty-state" id="emptyState">
-        <div class="empty-state-icon">⚕</div>
-        <h2>Hermes Agent</h2>
-        <p>Connect to your Hugging Face Space above, then start a conversation.</p>
-      </div>`;
-  }
-}
-
-async function resetSession() {
-  SESSION_ID = 'session_' + Math.random().toString(36).slice(2, 10);
-  clearChat();
-  if (isConnected) {
+    // Upload via HTTP (binary), server broadcasts user_file + queues for agent
+    const fd = new FormData();
+    fd.append('file', file);
+    if (text) fd.append('text', text);
     try {
-      await fetch(`${HF_BASE}/session/${SESSION_ID}/reset`, { method: 'POST' });
-    } catch {}
-    addSysMsg('New session started');
+      await fetch(`${HTTP_BASE}/upload/${sessionId}`, { method: 'POST', body: fd });
+    } catch(e) {
+      toast('Upload failed: ' + e.message, 'err');
+    }
+    return;
   }
-  showToast('New session started', 'success');
+
+  // Text: send via WebSocket
+  if (text) {
+    const id = uid();
+    ws.send(JSON.stringify({ type: 'text', text, id }));
+  }
 }
 
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (type ? ' ' + type : '');
-  setTimeout(() => { t.className = 'toast'; }, 3000);
+// ─── Message builders ─────────────────────────────────────────────────────────
+function addUserBubble(text, _file, skipEcho) {
+  const row = el('div', 'row user');
+  const av  = el('div', 'av user'); av.textContent = '👤';
+  const col = el('div', 'col');
+  const bub = el('div', 'bubble user'); bub.textContent = text;
+  const ts  = el('div', 'ts'); ts.textContent = now();
+  col.append(bub, ts);
+  row.append(col, av);
+  msgs().append(row);
+  scrollBottom();
 }
-</script>
-</body>
-</html>
+
+function addUserFileBubble(filename, mime, text) {
+  const row = el('div', 'row user');
+  const av  = el('div', 'av user'); av.textContent = '👤';
+  const col = el('div', 'col');
+
+  // Media preview or card
+  const card = buildFileCard(filename, mime, null);
+  col.append(card);
+  if (text) {
+    const bub = el('div', 'bubble user'); bub.textContent = text;
+    col.append(bub);
+  }
+  const ts = el('div', 'ts'); ts.textContent = now();
+  col.append(ts);
+  row.append(col, av);
+  msgs().append(row);
+  scrollBottom();
+}
+
+function buildFileCard(filename, mime, blobUrl) {
+  if (mime && mime.startsWith('image/') && blobUrl) {
+    const img = el('img', 'preview-img');
+    img.src = blobUrl; img.alt = filename;
+    return img;
+  }
+  if (mime && mime.startsWith('audio/') && blobUrl) {
+    const a = el('audio', 'preview-audio');
+    a.controls = true; a.src = blobUrl;
+    return a;
+  }
+  if (mime && mime.startsWith('video/') && blobUrl) {
+    const v = el('video', 'preview-video');
+    v.controls = true; v.src = blobUrl;
+    return v;
+  }
+  const card = el('div', 'attach-card');
+  const icon = el('span', 'attach-icon'); icon.textContent = fileIcon(mime, filename);
+  const body = el('div', 'attach-body');
+  const name = el('div', 'attach-name'); name.textContent = filename;
+  body.append(name);
+  card.append(icon, body);
+  return card;
+}
+
+function addAgentBubble(text, fromHistory) {
+  const row = el('div', 'row agent');
+  c
