@@ -13,12 +13,13 @@
   --user-bg:#1e1854;--user-border:#4c40c0;--agent-bg:#13161f;--agent-border:#272d40;
   --push-bg:#0d2218;--push-border:#1a5c38;--push-color:#4ade80;
   --text:#dde1ed;--text2:#7a849a;--text3:#3d4558;
-  --green:#4ade80;--red:#f87171;--yellow:#fbbf24;
+  --green:#4ade80;--red:#f87171;--yellow:#fbbf24;--orange:#fb923c;
   --radius:16px;--radius-sm:10px;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 
+/* ── Header ── */
 .header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;z-index:20}
 .logo{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--accent),#c084fc);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 18px var(--accent-dim)}
 .header-info{flex:1;min-width:0}
@@ -27,12 +28,14 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--text3);transition:background .3s,box-shadow .3s}
 .dot.online{background:var(--green);box-shadow:0 0 7px var(--green)}
 .dot.thinking{background:var(--yellow);box-shadow:0 0 7px var(--yellow);animation:blink 1s infinite}
+.dot.error{background:var(--red);box-shadow:0 0 7px var(--red)}
 .hdr-btn{width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
 .hdr-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--accent)}
 .notif-btn{position:relative}
 .notif-badge{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--green);display:none}
 .notif-badge.on{display:block}
 
+/* ── Connect bar ── */
 .connect-bar{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--surface2);border-bottom:1px solid var(--border);flex-shrink:0}
 .connect-bar input{flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:11.5px;padding:6px 10px;outline:none;transition:border-color .2s}
 .connect-bar input:focus{border-color:var(--accent)}
@@ -40,7 +43,30 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .conn-btn{padding:6px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
 .conn-btn:hover{background:var(--accent2)}
 .conn-btn.ok{background:#166534;color:#bbf7d0}
+.conn-btn:disabled{opacity:.6;cursor:not-allowed}
 
+/* ── Debug panel ── */
+#debugPanel{display:none;background:#070a10;border-bottom:1px solid #1e2535;flex-shrink:0;max-height:160px;overflow-y:auto;font-family:var(--mono);font-size:10.5px}
+#debugPanel.on{display:block}
+#debugLog{padding:6px 14px;display:flex;flex-direction:column;gap:2px}
+.dbg{display:flex;gap:8px;padding:2px 0;border-bottom:1px solid #0d1018}
+.dbg-time{color:var(--text3);flex-shrink:0}
+.dbg-tag{flex-shrink:0;padding:1px 5px;border-radius:3px;font-size:9.5px;font-weight:600;text-transform:uppercase}
+.dbg-tag.IN{background:#1a2a1a;color:var(--green)}
+.dbg-tag.OUT{background:#1a1a2a;color:#818cf8}
+.dbg-tag.ERR{background:#2a1a1a;color:var(--red)}
+.dbg-tag.SYS{background:#1a1a1a;color:var(--text3)}
+.dbg-tag.WARN{background:#2a200a;color:var(--yellow)}
+.dbg-msg{color:var(--text2);word-break:break-all;flex:1}
+.debug-bar{display:flex;align-items:center;gap:8px;padding:4px 14px;background:#070a10;border-bottom:1px solid #1e2535;flex-shrink:0}
+.debug-toggle{font-size:10.5px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;background:none;border:none;font-family:var(--mono);padding:0}
+.debug-toggle:hover{color:var(--text2)}
+.debug-count{font-size:10px;padding:1px 6px;border-radius:10px;background:var(--surface3);color:var(--text3)}
+.debug-count.err{background:#2a1a1a;color:var(--red)}
+.debug-clear{margin-left:auto;font-size:10px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:var(--mono)}
+.debug-clear:hover{color:var(--red)}
+
+/* ── Messages ── */
 .msgs{flex:1;overflow-y:auto;padding:16px 12px 8px;display:flex;flex-direction:column;gap:2px}
 .msgs::-webkit-scrollbar{width:3px}
 .msgs::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
@@ -59,10 +85,8 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .bubble.user{background:var(--user-bg);border:1px solid var(--user-border);border-bottom-right-radius:3px}
 .bubble.push{background:var(--push-bg);border:1px solid var(--push-border);border-bottom-left-radius:3px;color:var(--push-color)}
 .bubble.error{background:#1a0a0a;border:1px solid #7f1d1d;color:var(--red);border-bottom-left-radius:3px}
-
-/* Tool-call pill — shown while agent works, hidden once text arrives */
-.bubble.tool-call{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px;color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;display:flex;align-items:center;gap:6px}
-.tool-icon{font-size:13px}
+.bubble.warn{background:#1a1300;border:1px solid #713f12;color:var(--yellow);border-bottom-left-radius:3px;font-size:12px}
+.bubble.empty-reply{background:var(--surface2);border:1px solid var(--border);color:var(--text3);border-bottom-left-radius:3px;font-size:12px;font-style:italic}
 
 .bubble.agent p{margin-bottom:7px}
 .bubble.agent p:last-child{margin-bottom:0}
@@ -75,6 +99,7 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .bubble.agent h1,.bubble.agent h2,.bubble.agent h3{color:var(--accent2);margin:9px 0 5px;font-weight:600}
 .bubble.agent blockquote{border-left:3px solid var(--accent);padding-left:10px;color:var(--text2);margin:6px 0}
 .bubble.agent a{color:var(--accent2);text-decoration:underline}
+
 .ts{font-size:10px;color:var(--text3);padding:0 4px}
 .cursor{display:inline-block;width:2px;height:14px;background:var(--accent2);margin-left:2px;vertical-align:middle;animation:blink .7s infinite}
 .attach-card{display:flex;align-items:center;gap:9px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;max-width:260px}
@@ -96,6 +121,14 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .empty h2{font-size:18px;font-weight:600}
 .empty p{font-size:13px;color:var(--text2);max-width:280px;line-height:1.5}
 
+/* ── Status banner (shown when issues detected) ── */
+.status-banner{display:none;align-items:center;gap:8px;padding:6px 14px;font-size:11.5px;flex-shrink:0}
+.status-banner.on{display:flex}
+.status-banner.warn{background:#1a1300;border-bottom:1px solid #713f12;color:var(--yellow)}
+.status-banner.err{background:#1a0808;border-bottom:1px solid #7f1d1d;color:var(--red)}
+.status-banner a{color:inherit;text-decoration:underline;cursor:pointer}
+
+/* ── Input area ── */
 .input-area{padding:10px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
 .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .chip-row:empty{display:none}
@@ -125,6 +158,7 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.err{border-color:var(--red);color:var(--red)}
 .toast.ok{border-color:var(--green);color:var(--green)}
+.toast.warn{border-color:var(--yellow);color:var(--yellow)}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
@@ -144,9 +178,7 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
       <span id="sub">Not connected</span>
     </div>
   </div>
-  <button class="hdr-btn notif-btn" id="notifBtn" onclick="requestPush()" title="Enable notifications">
-    🔔<div class="notif-badge" id="notifBadge"></div>
-  </button>
+  <button class="hdr-btn notif-btn" id="notifBtn" onclick="requestPush()" title="Enable notifications">🔔<div class="notif-badge" id="notifBadge"></div></button>
   <button class="hdr-btn" onclick="newSession()" title="New session">✦</button>
   <button class="hdr-btn" onclick="clearUI()" title="Clear chat">🗑</button>
 </div>
@@ -154,6 +186,24 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 <div class="connect-bar">
   <input id="urlInput" type="text" placeholder="https://your-username-space-name.hf.space" spellcheck="false"/>
   <button class="conn-btn" id="connBtn" onclick="connect()">Connect</button>
+</div>
+
+<!-- Status banner — auto-shown when problems detected -->
+<div class="status-banner" id="statusBanner">
+  <span id="statusBannerText"></span>
+</div>
+
+<!-- Debug bar — always visible, panel toggles -->
+<div class="debug-bar">
+  <button class="debug-toggle" onclick="toggleDebug()">🔬 <span id="debugToggleLabel">Show debug log</span></button>
+  <span class="debug-count" id="debugCount">0 events</span>
+  <span class="debug-count err" id="errorCount" style="display:none">0 errors</span>
+  <button class="debug-clear" onclick="clearDebug()">clear</button>
+</div>
+
+<!-- Debug panel -->
+<div id="debugPanel">
+  <div id="debugLog"></div>
 </div>
 
 <div class="msgs" id="msgs">
@@ -187,57 +237,151 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── Tool-call JSON filter ────────────────────────────────────────────────────
-// Mirrors the server-side filter in shim.py.
-// Belt-and-suspenders: if the server misses one, the client catches it.
+// ════════════════════════════════════════════════════════════════
+// DEBUG LOGGER
+// ════════════════════════════════════════════════════════════════
+let _debugVisible = false;
+let _debugEventCount = 0;
+let _debugErrorCount = 0;
+const MAX_DEBUG_LINES = 200;
+
+function dbg(tag, msg) {
+  _debugEventCount++;
+  if (tag === 'ERR' || tag === 'WARN') {
+    if (tag === 'ERR') _debugErrorCount++;
+    // Auto-show debug panel on first error
+    if (!_debugVisible && tag === 'ERR') setDebugVisible(true);
+  }
+
+  const count = document.getElementById('debugCount');
+  const errCount = document.getElementById('errorCount');
+  count.textContent = _debugEventCount + ' events';
+  if (_debugErrorCount > 0) {
+    errCount.style.display = '';
+    errCount.textContent = _debugErrorCount + ' error' + (_debugErrorCount > 1 ? 's' : '');
+  }
+
+  const log = document.getElementById('debugLog');
+  const row = document.createElement('div');
+  row.className = 'dbg';
+  const time = document.createElement('span');
+  time.className = 'dbg-time';
+  time.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const tagEl = document.createElement('span');
+  tagEl.className = 'dbg-tag ' + tag;
+  tagEl.textContent = tag;
+  const msgEl = document.createElement('span');
+  msgEl.className = 'dbg-msg';
+  msgEl.textContent = typeof msg === 'object' ? JSON.stringify(msg) : String(msg);
+  row.append(time, tagEl, msgEl);
+
+  // Trim old lines
+  while (log.children.length >= MAX_DEBUG_LINES) log.removeChild(log.firstChild);
+  log.appendChild(row);
+
+  const panel = document.getElementById('debugPanel');
+  if (_debugVisible) panel.scrollTop = panel.scrollHeight;
+
+  // Mirror to console too
+  if (tag === 'ERR') console.error('[Hermes]', msg);
+  else if (tag === 'WARN') console.warn('[Hermes]', msg);
+  else console.log('[Hermes]', tag, msg);
+}
+
+function setDebugVisible(v) {
+  _debugVisible = v;
+  document.getElementById('debugPanel').classList.toggle('on', v);
+  document.getElementById('debugToggleLabel').textContent = v ? 'Hide debug log' : 'Show debug log';
+  if (v) document.getElementById('debugPanel').scrollTop = document.getElementById('debugPanel').scrollHeight;
+}
+function toggleDebug() { setDebugVisible(!_debugVisible); }
+function clearDebug() {
+  document.getElementById('debugLog').innerHTML = '';
+  _debugEventCount = 0; _debugErrorCount = 0;
+  document.getElementById('debugCount').textContent = '0 events';
+  document.getElementById('errorCount').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════════════════════
+// STATUS BANNER
+// ════════════════════════════════════════════════════════════════
+function showBanner(msg, type='warn') {
+  const b = document.getElementById('statusBanner');
+  const t = document.getElementById('statusBannerText');
+  b.className = 'status-banner on ' + type;
+  t.textContent = msg;
+}
+function hideBanner() {
+  document.getElementById('statusBanner').className = 'status-banner';
+}
+
+// ════════════════════════════════════════════════════════════════
+// TOOL-CALL FILTER (mirrors shim.py, belt-and-suspenders)
+// ════════════════════════════════════════════════════════════════
 const TOOL_PATTERNS = [
   /<tool_call>[\s\S]*?<\/tool_call>/g,
   /\{"type"\s*:\s*"function"[\s\S]*?\}/g,
-  /\{"name"\s*:\s*"[^"]+"\s*,\s*"(arguments|parameters)"\s*:[\s\S]*?\}/g,
+  /\{"name"\s*:\s*"[^"]+"\s*,\s*"(?:arguments|parameters)"\s*:[\s\S]*?\}/g,
+  /<\|tool_call_start\|>[\s\S]*?<\|tool_call_end\|>/g,
+  /\[TOOL_CALL\][\s\S]*?\[\/TOOL_CALL\]/g,
 ];
 
 function stripToolCalls(text) {
+  if (!text) return '';
   for (const pat of TOOL_PATTERNS) {
     text = text.replace(pat, '');
   }
   return text.trim();
 }
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
 let WS_BASE='', HTTP_BASE='', ws=null;
 let sessionId = newSid();
-let connected=false, pendingFile=null;
-let mediaRec=null, recChunks=[], recSecs=0, recTimer=null;
-let streamBubbles={};
-let vapidPublicKey='';
-let pushSubscription=null;
+let connected = false, pendingFile = null;
+let mediaRec = null, recChunks = [], recSecs = 0, recTimer = null;
+let streamBubbles = {};
+let vapidPublicKey = '';
+let pushSubscription = null;
+let reconnectTimer = null;
+let reconnectAttempts = 0;
+let typingEl = null;
+// Track last agent_typing time to detect stalled responses
+let lastTypingTime = 0;
+let typingWatchdog = null;
+const TYPING_TIMEOUT_MS = 310000; // 310s (just over shim's 300s agent timeout)
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('hermes_url');
   if (saved) document.getElementById('urlInput').value = saved;
   registerServiceWorker();
+  dbg('SYS', 'Hermes frontend loaded — debug panel ready');
 });
 
 async function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) return;
+  if (!('serviceWorker' in navigator)) { dbg('WARN', 'Service Worker not supported in this browser'); return; }
   try {
     await navigator.serviceWorker.register('/sw.js');
+    dbg('SYS', 'Service worker registered');
   } catch(e) {
-    console.warn('SW registration failed:', e);
+    dbg('WARN', 'SW registration failed: ' + e.message);
   }
 }
 
-function newSid() { return 'sid_' + Math.random().toString(36).slice(2,11); }
+function newSid() { return 'sid_' + Math.random().toString(36).slice(2, 11); }
 
-// ─── Push notifications ───────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// PUSH NOTIFICATIONS
+// ════════════════════════════════════════════════════════════════
 async function requestPush() {
-  if (!('Notification' in window)) { toast('Notifications not supported in this browser','err'); return; }
+  if (!('Notification' in window)) { toast('Notifications not supported','err'); return; }
   if (!vapidPublicKey) { toast('Connect to Hermes first','err'); return; }
-
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') { toast('Notification permission denied','err'); return; }
-
   try {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({
@@ -245,104 +389,183 @@ async function requestPush() {
       applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
     });
     pushSubscription = sub.toJSON();
-
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'push_subscribe', subscription: pushSubscription }));
+      ws.send(JSON.stringify({type:'push_subscribe', subscription:pushSubscription}));
     }
-
     document.getElementById('notifBadge').classList.add('on');
-    toast('Push notifications enabled! Hermes will alert you even when tab is closed.','ok');
+    toast('Push notifications enabled!','ok');
+    dbg('SYS', 'Push subscription registered');
   } catch(e) {
     toast('Push setup failed: ' + e.message,'err');
+    dbg('ERR', 'Push subscribe failed: ' + e.message);
   }
 }
 
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64  = (base64String + padding).replace(/-/g,'+').replace(/_/g,'/');
+function urlBase64ToUint8Array(b64) {
+  const padding = '='.repeat((4 - b64.length % 4) % 4);
+  const base64  = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw     = atob(base64);
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
-// ─── Connect ──────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// CONNECT
+// ════════════════════════════════════════════════════════════════
 function connect() {
-  let url = document.getElementById('urlInput').value.trim().replace(/\/$/,'');
+  let url = document.getElementById('urlInput').value.trim().replace(/\/$/, '');
   if (!url) { toast('Enter your HF Space URL','err'); return; }
+  // Normalise — strip trailing slash
+  if (!url.startsWith('http')) url = 'https://' + url;
+  document.getElementById('urlInput').value = url;
   localStorage.setItem('hermes_url', url);
   HTTP_BASE = url;
-  WS_BASE   = url.replace(/^https?/, m => m==='https'?'wss':'ws');
-  setStatus('thinking','Connecting…');
+  WS_BASE   = url.replace(/^https?/, m => m === 'https' ? 'wss' : 'ws');
+  reconnectAttempts = 0;
+  setStatus('thinking', 'Connecting…');
+  hideBanner();
+  dbg('SYS', 'Connecting to ' + url);
   openWS();
 }
 
 function openWS() {
-  if (ws) { try{ws.close()}catch(e){} }
-  ws = new WebSocket(`${WS_BASE}/ws/${sessionId}`);
-  ws.onopen = () => {};
-  ws.onmessage = e => { let m; try{m=JSON.parse(e.data)}catch{return}; handle(m); };
-  ws.onclose = () => {
-    connected=false;
-    setStatus('offline','Disconnected — reconnecting…');
-    document.getElementById('connBtn').textContent='Reconnect';
-    document.getElementById('connBtn').classList.remove('ok');
-    document.getElementById('connBtn').disabled=false;
-    setTimeout(openWS,3000);
+  if (ws) { try { ws.close(); } catch(e) {} }
+  clearTimeout(reconnectTimer);
+
+  const wsUrl = `${WS_BASE}/ws/${sessionId}`;
+  dbg('OUT', 'WebSocket → ' + wsUrl);
+
+  try {
+    ws = new WebSocket(wsUrl);
+  } catch(e) {
+    dbg('ERR', 'WebSocket constructor failed: ' + e.message);
+    scheduleReconnect();
+    return;
+  }
+
+  ws.onopen = () => {
+    dbg('SYS', 'WebSocket OPEN');
+    reconnectAttempts = 0;
   };
-  ws.onerror = () => setStatus('offline','Connection error');
+
+  ws.onmessage = e => {
+    let m;
+    try { m = JSON.parse(e.data); }
+    catch { dbg('ERR', 'Failed to parse message: ' + e.data); return; }
+    dbg('IN', JSON.stringify(m).slice(0, 200));
+    handle(m);
+  };
+
+  ws.onclose = ev => {
+    connected = false;
+    dbg('WARN', `WebSocket CLOSED code=${ev.code} reason="${ev.reason||'none'}"`);
+    setStatus('offline', 'Disconnected');
+    document.getElementById('connBtn').textContent = 'Reconnect';
+    document.getElementById('connBtn').classList.remove('ok');
+    document.getElementById('connBtn').disabled = false;
+    hideTyping();
+    scheduleReconnect();
+  };
+
+  ws.onerror = ev => {
+    dbg('ERR', 'WebSocket ERROR — see browser console for details');
+    setStatus('error', 'Connection error');
+  };
 }
 
-// ─── Message handler ──────────────────────────────────────────────────────────
+function scheduleReconnect() {
+  if (!HTTP_BASE) return; // Never connected, don't auto-retry
+  reconnectAttempts++;
+  const delay = Math.min(3000 * reconnectAttempts, 30000);
+  dbg('SYS', `Reconnecting in ${delay/1000}s (attempt ${reconnectAttempts})`);
+  setStatus('offline', `Reconnecting in ${Math.round(delay/1000)}s…`);
+  reconnectTimer = setTimeout(openWS, delay);
+}
+
+// ════════════════════════════════════════════════════════════════
+// TYPING WATCHDOG — detects stalled agent responses
+// ════════════════════════════════════════════════════════════════
+function startTypingWatchdog() {
+  clearTimeout(typingWatchdog);
+  lastTypingTime = Date.now();
+  typingWatchdog = setTimeout(() => {
+    if (typingEl) {
+      // Agent is still "typing" after timeout — something went wrong
+      hideTyping();
+      dbg('ERR', `Agent response timed out after ${TYPING_TIMEOUT_MS/1000}s — shim may have lost connection to Hermes gateway`);
+      addWarnBubble('⚠️ Agent response timed out. This usually means the Hermes gateway (port 8642) is not responding, or the agent took too long. Check the HF Space logs.');
+      setStatus('online', 'Connected · Idle (response timed out)');
+      showBanner('Agent response timed out — check HF Space logs for errors from Hermes gateway', 'warn');
+    }
+  }, TYPING_TIMEOUT_MS);
+}
+
+function stopTypingWatchdog() {
+  clearTimeout(typingWatchdog);
+}
+
+// ════════════════════════════════════════════════════════════════
+// MESSAGE HANDLER
+// ════════════════════════════════════════════════════════════════
 function handle(msg) {
   switch(msg.type) {
+
     case 'connected':
-      connected=true;
+      connected = true;
       vapidPublicKey = msg.vapid_public_key || '';
-      setStatus('online',`Connected · ${msg.model||'Hermes'}`);
-      document.getElementById('connBtn').textContent='Connected';
+      setStatus('online', `Connected · ${msg.model || 'Hermes'}`);
+      document.getElementById('connBtn').textContent = 'Connected';
       document.getElementById('connBtn').classList.add('ok');
-      document.getElementById('connBtn').disabled=false;
+      document.getElementById('connBtn').disabled = false;
       hideEmpty();
-      sysMsg(`Session started · ${msg.model}`);
+      hideBanner();
+      sysMsg(`Session started · ${msg.model || 'Hermes'}`);
+      dbg('SYS', 'Connected. Model: ' + (msg.model || 'unknown'));
+
       if (msg.history && msg.history.length) {
+        dbg('SYS', `Restoring ${msg.history.length} history messages`);
         msg.history.forEach(m => {
-          if (m.role==='user') addUserBubble(m.content,true);
-          else if (m.role==='assistant') {
+          if (m.role === 'user') addUserBubble(m.content, true);
+          else if (m.role === 'assistant') {
             const clean = stripToolCalls(m.content || '');
             if (clean) addAgentBubble(clean);
+            else dbg('WARN', 'History message stripped to empty after tool-call filter');
           }
         });
       }
-      if (pushSubscription && ws.readyState===WebSocket.OPEN) {
-        ws.send(JSON.stringify({type:'push_subscribe',subscription:pushSubscription}));
+
+      if (pushSubscription && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({type:'push_subscribe', subscription:pushSubscription}));
       }
-      toast('Connected!','ok');
+      toast('Connected!', 'ok');
       break;
 
     case 'user':
-      addUserBubble(msg.text,true);
+      // Echo from server — don't double-add if we already rendered locally
       break;
 
     case 'user_file':
-      addUserFileBubble(msg.filename,msg.mime,msg.text);
+      addUserFileBubble(msg.filename, msg.mime, msg.text);
       break;
 
     case 'agent_typing':
       showTyping();
-      setStatus('thinking','Thinking…');
+      setStatus('thinking', 'Thinking…');
+      startTypingWatchdog();
       break;
 
     case 'agent_ready':
       hideTyping();
-      setStatus('online','Connected · Ready');
+      stopTypingWatchdog();
+      setStatus('online', 'Connected · Ready');
       break;
 
     case 'stream_start':
       hideTyping();
+      stopTypingWatchdog();
       startStream(msg.id, msg.ts);
       break;
 
     case 'stream_delta': {
-      // Filter tool-call JSON that slipped through server-side filter
       const clean = stripToolCalls(msg.delta || '');
       if (clean) appendDelta(msg.id, clean);
       break;
@@ -352,16 +575,10 @@ function handle(msg) {
       endStream(msg.id);
       break;
 
-    // ── Proactive / push messages from agent ──────────────────────────────
-    // The agent can send these at any time (cron completion, background task, etc.)
     case 'push':
       addPushBubble(msg.text || msg.body || '');
-      // Also show a native notification if the tab is hidden
       if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification('Hermes Agent', {
-          body: msg.text || msg.body || '',
-          icon: '/favicon.ico',
-        });
+        new Notification('Hermes Agent', {body: msg.text || msg.body || '', icon: '/favicon.ico'});
       }
       break;
 
@@ -369,11 +586,24 @@ function handle(msg) {
       toast('Push subscription confirmed','ok');
       break;
 
-    case 'error':
+    case 'error': {
       hideTyping();
-      addErrorBubble(msg.text);
-      setStatus('online','Connected · Ready');
+      stopTypingWatchdog();
+      const errText = msg.text || msg.message || '(empty error — check debug log)';
+      dbg('ERR', 'Server error: ' + errText);
+      addErrorBubble(errText);
+      setStatus('online', 'Connected · Error');
+
+      // Detect specific known errors and show hints
+      if (errText.includes('timed out') || errText.includes('timeout')) {
+        showBanner('Hermes gateway timeout — the agent took >300s. The model may be overloaded or the gateway crashed. Check HF Space logs.', 'warn');
+      } else if (errText.includes('HTTP 5') || errText.includes('returned HTTP')) {
+        showBanner('Hermes gateway returned an error. Check HF Space container logs for the root cause.', 'err');
+      } else if (errText.includes('no choices') || errText.includes('Hermes returned no choices')) {
+        showBanner('Hermes returned an empty response. The model may have refused, or NVIDIA NIM API key may be invalid.', 'err');
+      }
       break;
+    }
 
     case 'reset':
       clearUI();
@@ -381,54 +611,74 @@ function handle(msg) {
       break;
 
     case 'pong':
+      dbg('SYS', 'pong ✓');
       break;
+
+    default:
+      dbg('WARN', 'Unknown message type: ' + msg.type + ' — ' + JSON.stringify(msg).slice(0,100));
   }
 }
 
-// ─── Send ─────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// SEND
+// ════════════════════════════════════════════════════════════════
 async function send() {
   if (!connected) { toast('Not connected','err'); return; }
-  const inp=document.getElementById('inp'), text=inp.value.trim(), file=pendingFile;
+  const inp = document.getElementById('inp'), text = inp.value.trim(), file = pendingFile;
   if (!text && !file) return;
-  inp.value=''; resize(inp);
-  pendingFile=null; document.getElementById('chipRow').innerHTML='';
+  inp.value = ''; resize(inp);
+  pendingFile = null; document.getElementById('chipRow').innerHTML = '';
 
   if (file) {
-    const fd=new FormData();
-    fd.append('file',file);
-    if (text) fd.append('text',text);
-    try { await fetch(`${HTTP_BASE}/upload/${sessionId}`,{method:'POST',body:fd}); }
-    catch(e) { toast('Upload failed: '+e.message,'err'); }
+    addUserFileBubble(file.name, file.type, text);
+    const fd = new FormData();
+    fd.append('file', file);
+    if (text) fd.append('text', text);
+    dbg('OUT', `Uploading file: ${file.name} (${file.type})`);
+    try {
+      await fetch(`${HTTP_BASE}/upload/${sessionId}`, {method:'POST', body:fd});
+    } catch(e) {
+      toast('Upload failed: ' + e.message,'err');
+      dbg('ERR', 'Upload failed: ' + e.message);
+    }
     return;
   }
-  if (text) ws.send(JSON.stringify({type:'text',text,id:uid()}));
+
+  // Text message
+  addUserBubble(text, false);
+  const payload = {type:'text', text, id:uid()};
+  dbg('OUT', JSON.stringify(payload));
+  ws.send(JSON.stringify(payload));
 }
 
-// ─── Bubble builders ──────────────────────────────────────────────────────────
-function addUserBubble(text,skipLog) {
+// ════════════════════════════════════════════════════════════════
+// BUBBLE BUILDERS
+// ════════════════════════════════════════════════════════════════
+function addUserBubble(text) {
   const row=el('div','row user'), av=el('div','av user'); av.textContent='👤';
   const col=el('div','col'), bub=el('div','bubble user'); bub.textContent=text;
   const ts=el('div','ts'); ts.textContent=now();
   col.append(bub,ts); row.append(col,av); msgs().append(row); scrollBottom();
 }
-function addUserFileBubble(filename,mime,text) {
+
+function addUserFileBubble(filename, mime, text) {
   const row=el('div','row user'), av=el('div','av user'); av.textContent='👤';
   const col=el('div','col');
-  col.append(buildFileCard(filename,mime,null));
+  col.append(buildFileCard(filename, mime, null));
   if (text) { const b=el('div','bubble user'); b.textContent=text; col.append(b); }
   const ts=el('div','ts'); ts.textContent=now(); col.append(ts);
   row.append(col,av); msgs().append(row); scrollBottom();
 }
+
 function addAgentBubble(text) {
   const clean = stripToolCalls(text);
-  if (!clean) return;
+  if (!clean) { dbg('WARN', 'addAgentBubble: empty after strip'); return; }
   const row=el('div','row agent'), av=el('div','av agent'); av.textContent='⚕';
   const col=el('div','col'), bub=el('div','bubble agent'); bub.innerHTML=md(clean);
   const ts=el('div','ts'); ts.textContent=now();
   col.append(bub,ts); row.append(av,col); msgs().append(row); scrollBottom();
 }
 
-// Push bubble — proactive agent message (no user prompt required)
 function addPushBubble(text) {
   if (!text || !text.trim()) return;
   const clean = stripToolCalls(text);
@@ -441,11 +691,22 @@ function addPushBubble(text) {
 }
 
 function addErrorBubble(text) {
+  // Always show something, even if text is empty
+  const display = (text && text.trim()) ? text : '(Agent returned an empty error — check debug log for details)';
   const row=el('div','row agent'), av=el('div','av agent'); av.textContent='⚕';
-  const col=el('div','col'), bub=el('div','bubble error'); bub.textContent=text;
+  const col=el('div','col'), bub=el('div','bubble error');
+  bub.textContent = '⚠ ' + display;
   col.append(bub); row.append(av,col); msgs().append(row); scrollBottom();
 }
-function buildFileCard(filename,mime,blobUrl) {
+
+function addWarnBubble(text) {
+  const row=el('div','row agent'), av=el('div','av agent'); av.textContent='⚕';
+  const col=el('div','col'), bub=el('div','bubble warn');
+  bub.textContent = text;
+  col.append(bub); row.append(av,col); msgs().append(row); scrollBottom();
+}
+
+function buildFileCard(filename, mime, blobUrl) {
   if (mime&&mime.startsWith('image/')&&blobUrl){const i=el('img','preview-img');i.src=blobUrl;i.alt=filename;return i}
   if (mime&&mime.startsWith('audio/')&&blobUrl){const a=el('audio','preview-audio');a.controls=true;a.src=blobUrl;return a}
   if (mime&&mime.startsWith('video/')&&blobUrl){const v=el('video','preview-video');v.controls=true;v.src=blobUrl;return v}
@@ -456,42 +717,64 @@ function buildFileCard(filename,mime,blobUrl) {
   body.append(name); card.append(icon,body); return card;
 }
 
-// ─── Streaming ────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// STREAMING
+// ════════════════════════════════════════════════════════════════
 function startStream(id) {
   const row=el('div','row agent'); row.id='stream_'+id;
   const av=el('div','av agent');av.textContent='⚕';
   const col=el('div','col'), bub=el('div','bubble agent');
   const cur=el('span','cursor'); bub.appendChild(cur);
   col.append(bub); row.append(av,col); msgs().append(row); scrollBottom();
-  streamBubbles[id]={col,bubble:bub,cursor:cur,text:''};
-}
-function appendDelta(id,delta) {
-  const s=streamBubbles[id]; if(!s)return;
-  s.text+=delta; s.bubble.innerHTML=md(s.text); s.bubble.appendChild(s.cursor); scrollBottom();
-}
-function endStream(id) {
-  const s=streamBubbles[id]; if(!s)return;
-  const clean = stripToolCalls(s.text);
-  s.bubble.innerHTML = clean ? md(clean) : '<span style="color:var(--text3);font-size:11px">…</span>';
-  const ts=el('div','ts');ts.textContent=now(); s.col.append(ts);
-  delete streamBubbles[id]; scrollBottom();
+  streamBubbles[id] = {col, bubble:bub, cursor:cur, text:''};
+  dbg('SYS', 'Stream started: ' + id);
 }
 
-// ─── Typing indicator ─────────────────────────────────────────────────────────
-let typingEl=null;
+function appendDelta(id, delta) {
+  const s = streamBubbles[id]; if (!s) return;
+  s.text += delta;
+  s.bubble.innerHTML = md(s.text);
+  s.bubble.appendChild(s.cursor);
+  scrollBottom();
+}
+
+function endStream(id) {
+  const s = streamBubbles[id]; if (!s) return;
+  const clean = stripToolCalls(s.text);
+  if (clean) {
+    s.bubble.innerHTML = md(clean);
+  } else {
+    // Stream ended with empty text — show a visible warning rather than silently disappearing
+    dbg('WARN', 'stream_end: text stripped to empty. Raw text was: ' + s.text.slice(0,300));
+    s.bubble.className = 'bubble empty-reply';
+    s.bubble.textContent = '(Agent response was empty or contained only tool-call data — see debug log)';
+    showBanner('Agent returned an empty response after stripping tool calls. This may indicate the model replied with only internal tool-call JSON. Check debug log.', 'warn');
+  }
+  const ts=el('div','ts'); ts.textContent=now(); s.col.append(ts);
+  delete streamBubbles[id];
+  dbg('SYS', 'Stream ended: ' + id + ' (' + (clean ? clean.length + ' chars' : 'EMPTY') + ')');
+  scrollBottom();
+}
+
+// ════════════════════════════════════════════════════════════════
+// TYPING INDICATOR
+// ════════════════════════════════════════════════════════════════
 function showTyping() {
-  if(typingEl)return;
-  const row=el('div','typing-row');row.id='typingRow';
-  const av=el('div','av agent');av.textContent='⚕';
-  const bub=el('div','typing-bubble');bub.innerHTML='<span></span><span></span><span></span>';
+  if (typingEl) return;
+  const row=el('div','typing-row'); row.id='typingRow';
+  const av=el('div','av agent'); av.textContent='⚕';
+  const bub=el('div','typing-bubble'); bub.innerHTML='<span></span><span></span><span></span>';
   row.append(av,bub); msgs().append(row); typingEl=row; scrollBottom();
 }
-function hideTyping() { if(typingEl){typingEl.remove();typingEl=null;} }
+function hideTyping() { if (typingEl){typingEl.remove();typingEl=null;} }
 
-// ─── File picking ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// FILE + VOICE
+// ════════════════════════════════════════════════════════════════
 function pickFile(e) {
-  const file=e.target.files[0]; if(!file)return;
+  const file=e.target.files[0]; if (!file) return;
   pendingFile=file; showChip(file); e.target.value='';
+  dbg('SYS', 'File picked: ' + file.name + ' (' + file.type + ')');
 }
 function showChip(file) {
   const row=document.getElementById('chipRow'); row.innerHTML='';
@@ -505,9 +788,8 @@ function showChip(file) {
   chip.append(name,rm); row.append(chip);
 }
 
-// ─── Voice ────────────────────────────────────────────────────────────────────
 async function toggleRec() {
-  if(mediaRec&&mediaRec.state==='recording'){stopRec();return;}
+  if (mediaRec&&mediaRec.state==='recording'){stopRec();return;}
   try {
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     recChunks=[];recSecs=0;
@@ -524,25 +806,36 @@ async function toggleRec() {
   } catch { toast('Mic access denied','err'); }
 }
 function stopRec() {
-  if(mediaRec&&mediaRec.state==='recording')mediaRec.stop();
+  if (mediaRec&&mediaRec.state==='recording')mediaRec.stop();
   clearInterval(recTimer); document.getElementById('recRow').classList.remove('on');
 }
 
-// ─── Keepalive ────────────────────────────────────────────────────────────────
-setInterval(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'ping'}));},25000);
+// ════════════════════════════════════════════════════════════════
+// KEEPALIVE
+// ════════════════════════════════════════════════════════════════
+setInterval(() => {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type:'ping'}));
+    dbg('OUT', 'ping');
+  }
+}, 25000);
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════
 function msgs(){return document.getElementById('msgs')}
 function scrollBottom(){const m=msgs();m.scrollTop=m.scrollHeight}
 function hideEmpty(){const e=document.getElementById('empty');if(e)e.remove()}
 function sysMsg(txt){const d=el('div','sys');d.textContent=txt;msgs().append(d);scrollBottom()}
 function setStatus(state,txt){
-  document.getElementById('dot').className='dot '+(state==='online'?'online':state==='thinking'?'thinking':'');
+  const dotEl = document.getElementById('dot');
+  dotEl.className='dot '+(state==='online'?'online':state==='thinking'?'thinking':state==='error'?'error':'');
   document.getElementById('sub').textContent=txt;
 }
 function clearUI(){msgs().innerHTML=''}
 function newSession(){
   sessionId=newSid();clearUI();
+  dbg('SYS','New session: '+sessionId);
   if(ws&&ws.readyState===WebSocket.OPEN){ws.close();openWS();}
   toast('New session','ok');
 }
@@ -564,12 +857,13 @@ function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHei
 function toast(msg,type){
   const t=document.getElementById('toast');t.textContent=msg;
   t.className='toast on'+(type?' '+type:'');
-  clearTimeout(t._t);t._t=setTimeout(()=>{t.className='toast';},3000);
+  clearTimeout(t._t);t._t=setTimeout(()=>{t.className='toast';},3500);
 }
 
-// ─── Markdown ─────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// MARKDOWN
+// ════════════════════════════════════════════════════════════════
 function md(raw) {
-  // First strip any tool call JSON before rendering markdown
   raw = stripToolCalls(raw);
   if (!raw) return '';
   let s=esc(raw);
