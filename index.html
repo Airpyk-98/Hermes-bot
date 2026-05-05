@@ -59,6 +59,11 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 .bubble.user{background:var(--user-bg);border:1px solid var(--user-border);border-bottom-right-radius:3px}
 .bubble.push{background:var(--push-bg);border:1px solid var(--push-border);border-bottom-left-radius:3px;color:var(--push-color)}
 .bubble.error{background:#1a0a0a;border:1px solid #7f1d1d;color:var(--red);border-bottom-left-radius:3px}
+
+/* Tool-call pill — shown while agent works, hidden once text arrives */
+.bubble.tool-call{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px;color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;display:flex;align-items:center;gap:6px}
+.tool-icon{font-size:13px}
+
 .bubble.agent p{margin-bottom:7px}
 .bubble.agent p:last-child{margin-bottom:0}
 .bubble.agent code{font-family:var(--mono);font-size:11.5px;background:rgba(124,106,247,.12);padding:1px 5px;border-radius:4px;color:var(--accent2)}
@@ -182,6 +187,22 @@ html,body{height:100dvh;overflow:hidden;font-family:var(--font);background:var(-
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── Tool-call JSON filter ────────────────────────────────────────────────────
+// Mirrors the server-side filter in shim.py.
+// Belt-and-suspenders: if the server misses one, the client catches it.
+const TOOL_PATTERNS = [
+  /<tool_call>[\s\S]*?<\/tool_call>/g,
+  /\{"type"\s*:\s*"function"[\s\S]*?\}/g,
+  /\{"name"\s*:\s*"[^"]+"\s*,\s*"(arguments|parameters)"\s*:[\s\S]*?\}/g,
+];
+
+function stripToolCalls(text) {
+  for (const pat of TOOL_PATTERNS) {
+    text = text.replace(pat, '');
+  }
+  return text.trim();
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 let WS_BASE='', HTTP_BASE='', ws=null;
 let sessionId = newSid();
@@ -225,7 +246,6 @@ async function requestPush() {
     });
     pushSubscription = sub.toJSON();
 
-    // Send subscription to backend via WebSocket
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'push_subscribe', subscription: pushSubscription }));
     }
@@ -286,27 +306,82 @@ function handle(msg) {
       if (msg.history && msg.history.length) {
         msg.history.forEach(m => {
           if (m.role==='user') addUserBubble(m.content,true);
-          else if (m.role==='assistant') addAgentBubble(m.content);
+          else if (m.role==='assistant') {
+            const clean = stripToolCalls(m.content || '');
+            if (clean) addAgentBubble(clean);
+          }
         });
       }
-      // Re-send push subscription if we have one
       if (pushSubscription && ws.readyState===WebSocket.OPEN) {
         ws.send(JSON.stringify({type:'push_subscribe',subscription:pushSubscription}));
       }
       toast('Connected!','ok');
       break;
-    case 'user':        addUserBubble(msg.text,true); break;
-    case 'user_file':   addUserFileBubble(msg.filename,msg.mime,msg.text); break;
-    case 'agent_typing':showTyping(); setStatus('thinking','Thinking…'); break;
-    case 'agent_ready': hideTyping(); setStatus('online','Connected · Ready'); break;
-    case 'stream_start':hideTyping(); startStream(msg.id,msg.ts); break;
-    case 'stream_delta':appendDelta(msg.id,msg.delta); break;
-    case 'stream_end':  endStream(msg.id); break;
-    case 'push':        addPushBubble(msg.text); break;
-    case 'push_subscribed': toast('Push subscription confirmed','ok'); break;
-    case 'error':       hideTyping(); addErrorBubble(msg.text); setStatus('online','Connected · Ready'); break;
-    case 'reset':       clearUI(); sysMsg('Session reset'); break;
-    case 'pong':        break;
+
+    case 'user':
+      addUserBubble(msg.text,true);
+      break;
+
+    case 'user_file':
+      addUserFileBubble(msg.filename,msg.mime,msg.text);
+      break;
+
+    case 'agent_typing':
+      showTyping();
+      setStatus('thinking','Thinking…');
+      break;
+
+    case 'agent_ready':
+      hideTyping();
+      setStatus('online','Connected · Ready');
+      break;
+
+    case 'stream_start':
+      hideTyping();
+      startStream(msg.id, msg.ts);
+      break;
+
+    case 'stream_delta': {
+      // Filter tool-call JSON that slipped through server-side filter
+      const clean = stripToolCalls(msg.delta || '');
+      if (clean) appendDelta(msg.id, clean);
+      break;
+    }
+
+    case 'stream_end':
+      endStream(msg.id);
+      break;
+
+    // ── Proactive / push messages from agent ──────────────────────────────
+    // The agent can send these at any time (cron completion, background task, etc.)
+    case 'push':
+      addPushBubble(msg.text || msg.body || '');
+      // Also show a native notification if the tab is hidden
+      if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('Hermes Agent', {
+          body: msg.text || msg.body || '',
+          icon: '/favicon.ico',
+        });
+      }
+      break;
+
+    case 'push_subscribed':
+      toast('Push subscription confirmed','ok');
+      break;
+
+    case 'error':
+      hideTyping();
+      addErrorBubble(msg.text);
+      setStatus('online','Connected · Ready');
+      break;
+
+    case 'reset':
+      clearUI();
+      sysMsg('Session reset');
+      break;
+
+    case 'pong':
+      break;
   }
 }
 
@@ -345,17 +420,26 @@ function addUserFileBubble(filename,mime,text) {
   row.append(col,av); msgs().append(row); scrollBottom();
 }
 function addAgentBubble(text) {
+  const clean = stripToolCalls(text);
+  if (!clean) return;
   const row=el('div','row agent'), av=el('div','av agent'); av.textContent='⚕';
-  const col=el('div','col'), bub=el('div','bubble agent'); bub.innerHTML=md(text);
+  const col=el('div','col'), bub=el('div','bubble agent'); bub.innerHTML=md(clean);
   const ts=el('div','ts'); ts.textContent=now();
   col.append(bub,ts); row.append(av,col); msgs().append(row); scrollBottom();
 }
+
+// Push bubble — proactive agent message (no user prompt required)
 function addPushBubble(text) {
+  if (!text || !text.trim()) return;
+  const clean = stripToolCalls(text);
+  if (!clean) return;
   const row=el('div','row push'), av=el('div','av push'); av.textContent='📡';
-  const col=el('div','col'), bub=el('div','bubble push'); bub.innerHTML='📡 '+esc(text);
+  const col=el('div','col'), bub=el('div','bubble push');
+  bub.innerHTML='<span style="opacity:.7;font-size:11px;margin-right:4px">📡 Agent update</span><br>' + md(clean);
   const ts=el('div','ts'); ts.textContent=now();
   col.append(bub,ts); row.append(av,col); msgs().append(row); scrollBottom();
 }
+
 function addErrorBubble(text) {
   const row=el('div','row agent'), av=el('div','av agent'); av.textContent='⚕';
   const col=el('div','col'), bub=el('div','bubble error'); bub.textContent=text;
@@ -387,7 +471,8 @@ function appendDelta(id,delta) {
 }
 function endStream(id) {
   const s=streamBubbles[id]; if(!s)return;
-  s.bubble.innerHTML=md(s.text);
+  const clean = stripToolCalls(s.text);
+  s.bubble.innerHTML = clean ? md(clean) : '<span style="color:var(--text3);font-size:11px">…</span>';
   const ts=el('div','ts');ts.textContent=now(); s.col.append(ts);
   delete streamBubbles[id]; scrollBottom();
 }
@@ -484,6 +569,9 @@ function toast(msg,type){
 
 // ─── Markdown ─────────────────────────────────────────────────────────────────
 function md(raw) {
+  // First strip any tool call JSON before rendering markdown
+  raw = stripToolCalls(raw);
+  if (!raw) return '';
   let s=esc(raw);
   s=s.replace(/```(\w*)\n([\s\S]*?)```/g,(_,l,c)=>`<pre><code>${c.trim()}</code></pre>`);
   s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
